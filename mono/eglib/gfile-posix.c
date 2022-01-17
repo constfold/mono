@@ -166,7 +166,12 @@ gchar *
 g_get_current_dir (void)
 {
 	int s = 32;
+#ifndef G_OS_WIN32
 	char *buffer = NULL, *r;
+#else
+#define getcwd _wgetcwd;
+	unichar2* buffer = NULL, *r;
+#endif
 	gboolean fail;
 	
 	do {
