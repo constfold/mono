@@ -169,14 +169,17 @@ g_get_current_dir (void)
 #ifndef G_OS_WIN32
 	char *buffer = NULL, *r;
 #else
-#define getcwd _wgetcwd;
 	unichar2* buffer = NULL, *r;
 #endif
 	gboolean fail;
 	
 	do {
 		buffer = g_realloc (buffer, s);
+#ifndef G_OS_WIN32
 		r = getcwd (buffer, s);
+#else
+		r = _wgetcwd (buffer, s);
+#endif
 		fail = (r == NULL && errno == ERANGE);
 		if (fail) {
 			s <<= 1;
@@ -187,5 +190,9 @@ g_get_current_dir (void)
 	 * but the top 32-bits of r have overflown to 0xffffffff (seriously, getcwd
 	 * so we return the buffer here since it has a pointer to the valid string
 	 */
+#ifndef G_OS_WIN32
 	return buffer;
+#else
+	return u16tou8(buffer);
+#endif
 }
